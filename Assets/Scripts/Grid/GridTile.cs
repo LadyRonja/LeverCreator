@@ -29,6 +29,8 @@ public class GridTile
     public int H { get; set; }
     public int F { get => (G + H); }
 
+    public bool blocksMovement = false;
+
     public static (int q, int r, int s) GetCoordsFromCoordString(string coordString)
     {
         string[] splitString = coordString.Split(',');

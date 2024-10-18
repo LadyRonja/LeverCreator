@@ -46,7 +46,7 @@ public class GridGenerator : MonoBehaviour
 
                 GameObject tile = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
 
-                tile.transform.name = $"Hex ({newTile.coords})";
+                tile.transform.name = $"{newTile.coords}";
                 tiles.Add(newTile.coords, newTile);
             }
         }
@@ -66,12 +66,20 @@ public class GridGenerator : MonoBehaviour
                 GameObject unitObj = Instantiate(unitPrefab, unitPos, Quaternion.identity);
                 Unit unitScr = unitObj.GetComponent<Unit>();
                 
-                string newUnitID = $"{q}_{r}-{Guid.NewGuid()}";
+                string newUnitID = GridTile.GetStringFromCoords(q, r);
                 unitScr.unitID = newUnitID;
                 
                 unitObj.transform.name = newUnitID;
                 units.Add(unitScr.unitID, unitScr);
             }
+        }
+
+        Debug.Log("Unit names!");
+        foreach (var item in units.Keys)
+        {
+            _ = units.TryGetValue(item, out Unit unit);
+
+            Debug.Log(unit.transform.name);
         }
     }
 

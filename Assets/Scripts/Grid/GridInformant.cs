@@ -29,6 +29,14 @@ public class GridInformant : Singleton<GridInformant>
     public void SetActiveGrid(LevelData levelToSetActive)
     {
         activeLevel = levelToSetActive;
+
+        Debug.Log("Unit names!");
+        foreach (var item in activeLevel.units.Keys)
+        {
+            _ = activeLevel.units.TryGetValue(item, out Unit unit);
+
+            Debug.Log(unit.transform.name);
+        }
     }
 
     #region Tile data
@@ -69,11 +77,12 @@ public class GridInformant : Singleton<GridInformant>
         return GetAllNeighbourTiles(ofTile.q, ofTile.r);
     }
 
-    public bool TileExists(int q, int r)
+    public bool TileExists(int q, int r, out GridTile tile)
     {
+        tile = null;
         if(activeLevel== null) { return false; }
 
-        return activeLevel.tiles.ContainsKey(GridTile.GetStringFromCoords(q, r));
+        return activeLevel.tiles.TryGetValue(GridTile.GetStringFromCoords(q, r), out tile);
     }
     #endregion
 
@@ -83,7 +92,7 @@ public class GridInformant : Singleton<GridInformant>
         unit = null;
         if(activeLevel == null) { return false; }
 
-        return activeLevel.units.TryGetValue(unit.unitID, out unit);
+        return activeLevel.units.TryGetValue(GridTile.GetStringFromCoords(q ,r), out unit);
     }
 
     public bool TryGetUnit(GridTile onTile, out Unit unit)
