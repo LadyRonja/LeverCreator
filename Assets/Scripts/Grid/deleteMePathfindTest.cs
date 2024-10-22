@@ -20,7 +20,6 @@ public class deleteMePathfindTest : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-
     }
 
     void TestPath()

@@ -31,6 +31,7 @@ public class GridGenerator : MonoBehaviour
         activeLevel.tileData = tileData;
 
         GridInformant.Instance.SetActiveGrid(activeLevel);
+        ActiveLevelManager.Instance.SetActiveGrid(activeLevel);
     }
 
     private void GenerateGrid()
@@ -66,20 +67,12 @@ public class GridGenerator : MonoBehaviour
                 GameObject unitObj = Instantiate(unitPrefab, unitPos, Quaternion.identity);
                 Unit unitScr = unitObj.GetComponent<Unit>();
                 
-                string newUnitID = GridTile.GetStringFromCoords(q, r);
-                unitScr.unitID = newUnitID;
+                string unitPosString = GridTile.GetStringFromCoords(q, r);
+                unitScr.unitID = Guid.NewGuid().ToString();
                 
-                unitObj.transform.name = newUnitID;
-                units.Add(unitScr.unitID, unitScr);
+                unitObj.transform.name = unitScr.unitID;
+                units.Add(unitPosString, unitScr);
             }
-        }
-
-        Debug.Log("Unit names!");
-        foreach (var item in units.Keys)
-        {
-            _ = units.TryGetValue(item, out Unit unit);
-
-            Debug.Log(unit.transform.name);
         }
     }
 

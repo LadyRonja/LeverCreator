@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public enum NeighbourDirections { NW, N, NE, SE, S, SW}
 
@@ -25,18 +27,9 @@ public class GridInformant : Singleton<GridInformant>
         }
     }
 
-
     public void SetActiveGrid(LevelData levelToSetActive)
     {
         activeLevel = levelToSetActive;
-
-        Debug.Log("Unit names!");
-        foreach (var item in activeLevel.units.Keys)
-        {
-            _ = activeLevel.units.TryGetValue(item, out Unit unit);
-
-            Debug.Log(unit.transform.name);
-        }
     }
 
     #region Tile data
@@ -83,6 +76,51 @@ public class GridInformant : Singleton<GridInformant>
         if(activeLevel== null) { return false; }
 
         return activeLevel.tiles.TryGetValue(GridTile.GetStringFromCoords(q, r), out tile);
+    }
+
+    public bool TryGetTileFromWorldPos(Vector2 worldPos, out GridTile tile)
+    {
+        tile = null;
+        if(activeLevel == null) {return false;}
+
+        // Convert worldPos to tile coords
+        (int q, int r, int s) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(activeLevel.tileData, worldPos);
+        string coordString = GridTile.GetStringFromCoords(q, r);
+
+        return activeLevel.tiles.TryGetValue(coordString, out tile);
+    }
+
+    public Vector2 GetPositionWorldFromTile(GridTile tile)
+    {
+        if(activeLevel == null) { Debug.LogError("Active level not set"); return Vector2.zero; }
+
+        return GridLayoutRules.GetPositionForFlatTopTile(activeLevel.tileData, tile.q, tile.r);
+    }
+
+    public bool TryGetTileFromUnit(Unit fromUnit, out GridTile tile)
+    {
+        tile = null;
+        if(activeLevel == null) { return false;}
+       
+        // FirstOrDefault retruns a non-nullable value and thus it must be enusred the value exists before proceeding.
+        if(!activeLevel.units.ContainsValue(fromUnit)) { return false; }
+        string unitPos = activeLevel.units.First(u => u.Value == fromUnit).Key;
+
+        #region Silly but more optimized method
+        /*bool found = false;
+        string unitPos = activeLevel.units.FirstOrDefault(u => u.Value == fromUnit && (found = true)).Key;
+        if (found)
+        {
+            return activeLevel.tiles.TryGetValue(unitPos, out tile);
+        }
+        else
+        {
+            return false;
+        }*/
+        #endregion
+
+        return activeLevel.tiles.TryGetValue(unitPos, out tile);
+
     }
     #endregion
 
