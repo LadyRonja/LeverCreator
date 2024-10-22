@@ -23,7 +23,7 @@ public class LevelEditCamera : MonoBehaviour
     {
         MouseMovement();
         ZoomHandler();
-        ReturnToStart();
+        //ReturnToStart();
     }
 
     private void MouseMovement()

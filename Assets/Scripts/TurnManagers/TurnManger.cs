@@ -2,17 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TurnManger : MonoBehaviour
+public class TurnManger : Singleton<TurnManger>
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public enum TurnTakers { PLAYER, ENEMY }
 
-    // Update is called once per frame
-    void Update()
+    public void SetTurn(TurnTakers toWhom)
     {
-        
+        switch (toWhom)
+        {
+            case TurnTakers.PLAYER:
+                PlayerTurnHandler.Instance.StartTurn();
+                break;
+            case TurnTakers.ENEMY:
+                EnemyTurnHandler.Instance.StartTurn();
+                break;
+            default:
+                Debug.LogError("Reached default in enum switch statement, missing cases?");
+                break;
+        }
     }
 }

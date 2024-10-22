@@ -4,16 +4,23 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerTurnHandler : MonoBehaviour
+public class PlayerTurnHandler : Singleton<PlayerTurnHandler>
 {
     bool inputEnabled = true;
     Unit selectedUnit = null;
 
     void Update()
     {
-        if(inputEnabled && Input.GetMouseButtonDown((int)MouseButton.Left))
+        if (!inputEnabled) return;
+
+        if (Input.GetMouseButtonDown((int)MouseButton.Left))
         {
             OnLeftclick();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnSpaceDown();
         }
     }
 
@@ -25,7 +32,7 @@ public class PlayerTurnHandler : MonoBehaviour
         // If there is no selected unit, try and set one
         if(selectedUnit == null)
         {
-            Debug.Log("Trying to set unit");
+            //Debug.Log("Trying to set unit");
             TrySetSelectedUnit(clickedTile);
             return;
         }
@@ -33,15 +40,31 @@ public class PlayerTurnHandler : MonoBehaviour
         // If the selected unit is controlled by the player, try to move it
         if (selectedUnit.data.controlledByPlayer)
         {
-            Debug.Log("Trying to move unit");
+            //Debug.Log("Trying to move unit");
             TryToMoveSelectedUnit(clickedTile);
             return;
         }
         else {
-            Debug.Log("Deselecting enemy unit");
+            //Debug.Log("Deselecting enemy unit");
             selectedUnit= null;
             return;
         }
+    }
+
+    private void OnSpaceDown()
+    {
+        EndTurn();
+    }
+
+    public void EndTurn()
+    {
+        inputEnabled = false;
+        TurnManger.Instance.SetTurn(TurnManger.TurnTakers.ENEMY);
+    }
+
+    public void StartTurn()
+    {
+        inputEnabled = true;
     }
 
     private void TrySetSelectedUnit(GridTile fromTile)
@@ -58,7 +81,7 @@ public class PlayerTurnHandler : MonoBehaviour
         if(path == null) { inputEnabled = true; selectedUnit = null; return; }
         if(path.Count == 0) { inputEnabled = true; selectedUnit = null; return; }
 
-        Debug.Log("starting movement!");
+        //Debug.Log("starting movement!");
         StartCoroutine(MovePath(path));
     }
 
