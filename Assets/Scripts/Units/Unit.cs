@@ -13,7 +13,7 @@ public class Unit : MonoBehaviour
         if(data == null) data = ScriptableObject.CreateInstance<UnitData>();
         if (myRenderer == null) return;
 
-        if(Random.Range(0, 5) == 1)
+        if(Random.Range(0, 3) == 1)
         {
             data.controlledByPlayer = false;
         }

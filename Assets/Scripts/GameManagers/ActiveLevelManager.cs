@@ -5,6 +5,8 @@ using UnityEngine;
 public class ActiveLevelManager : Singleton<ActiveLevelManager>
 {
     LevelData activeLevel;
+    public LevelData ActiveLevel { get => activeLevel; private set => activeLevel = value; }
+
     private void Start()
     {
         if (activeLevel == null)
