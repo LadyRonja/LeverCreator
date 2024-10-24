@@ -17,7 +17,7 @@ public class GridGenerator : MonoBehaviour
     Vector3 startPos;
     float tileWidth;
     float tileHeight;
-    GridLayoutRules.LayoutData tileData;
+    GridLayoutRules.LayoutData layoutData;
 
     private void Start()
     {
@@ -25,10 +25,10 @@ public class GridGenerator : MonoBehaviour
         GenerateGrid();
         tempGenerateUnits();
 
-        LevelData activeLevel = ScriptableObject.CreateInstance<LevelData>();
+        LevelData activeLevel = new();
         activeLevel.tiles = tiles;
         activeLevel.units = units;
-        activeLevel.tileData = tileData;
+        activeLevel.layoutData = layoutData;
 
         GridInformant.Instance.SetActiveGrid(activeLevel);
         ActiveLevelManager.Instance.SetActiveGrid(activeLevel);
@@ -42,7 +42,7 @@ public class GridGenerator : MonoBehaviour
         {
             for (int r = 0; r < debugHeight; r++)
             {
-                Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(tileData, q, r);
+                Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(layoutData, q, r);
                 GridTile newTile = new GridTile(q, r);
 
                 GameObject tile = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
@@ -63,7 +63,7 @@ public class GridGenerator : MonoBehaviour
             {
                 if (q != r) continue;
 
-                Vector2 unitPos = GridLayoutRules.GetPositionForFlatTopTile(tileData, q, r);
+                Vector2 unitPos = GridLayoutRules.GetPositionForFlatTopTile(layoutData, q, r);
                 GameObject unitObj = Instantiate(unitPrefab, unitPos, Quaternion.identity);
                 Unit unitScr = unitObj.GetComponent<Unit>();
                 
@@ -103,7 +103,7 @@ public class GridGenerator : MonoBehaviour
         SpriteRenderer sr = temp.GetComponent<SpriteRenderer>();
         tileWidth = sr.bounds.size.x;
         tileHeight = sr.bounds.size.y;
-        tileData = new GridLayoutRules.LayoutData(startPos, tileWidth, tileHeight);
+        layoutData = new GridLayoutRules.LayoutData(startPos, tileWidth, tileHeight);
         Destroy(temp);
     }
 }

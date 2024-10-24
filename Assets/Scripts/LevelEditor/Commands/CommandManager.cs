@@ -13,6 +13,8 @@ public class CommandManager : Singleton<CommandManager>
 
     public void Undo()
     {
+        if (history.Count == 0) { return; }
+
         Command c = history.Peek();
         if(c != null) {
             history.Peek().Undo();

@@ -84,7 +84,7 @@ public class GridInformant : Singleton<GridInformant>
         if(activeLevel == null) {return false;}
 
         // Convert worldPos to tile coords
-        (int q, int r, int s) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(activeLevel.tileData, worldPos);
+        (int q, int r, _) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(activeLevel.layoutData, worldPos);
         string coordString = GridTile.GetStringFromCoords(q, r);
 
         return activeLevel.tiles.TryGetValue(coordString, out tile);
@@ -94,7 +94,7 @@ public class GridInformant : Singleton<GridInformant>
     {
         if(activeLevel == null) { Debug.LogError("Active level not set"); return Vector2.zero; }
 
-        return GridLayoutRules.GetPositionForFlatTopTile(activeLevel.tileData, tile.q, tile.r);
+        return GridLayoutRules.GetPositionForFlatTopTile(activeLevel.layoutData, tile.q, tile.r);
     }
 
     public bool TryGetTileFromUnit(Unit fromUnit, out GridTile tile)
