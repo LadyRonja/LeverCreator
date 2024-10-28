@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ public class LevelEditManager : Singleton<LevelEditManager>
 
     LevelData levelBeingEdited = null;
     public LevelData LevelBeingEdited { get => levelBeingEdited; private set => levelBeingEdited = value; }
-    
+
     [SerializeField] GameObject tilePrefab;
     [SerializeField] GameObject unitPrefab;
     List<GameObject> levelObjects = new();
@@ -37,8 +38,10 @@ public class LevelEditManager : Singleton<LevelEditManager>
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown((int)MouseButton.Left))
+        if (Input.GetMouseButtonDown((int)MouseButton.Left))
         {
+            if (ClickIsAtEdge(Input.mousePosition)) { return; }
+
             if (editModes.TryGetValue((editMethod, editLayer), out EditMode currentMode))
             {
                 currentMode();
@@ -112,6 +115,35 @@ public class LevelEditManager : Singleton<LevelEditManager>
         levelBeingEdited = null;
     }
 
+    private bool ClickIsAtEdge(Vector2 screenPos)
+    {
+        float cutOffPercentage = 0.85f;
+
+        float rightCutOff = Screen.width * cutOffPercentage;
+        float leftCutOff = Screen.width * (1f - cutOffPercentage);
+        float upCutOff = Screen.height * cutOffPercentage;
+        float downCutOff = Screen.height * (1f - cutOffPercentage);
+
+        #region Debug
+        /*
+        Debug.Log($"Cutoff right: {rightCutOff}");
+        Debug.Log($"Cutoff left: {leftCutOff}");
+        Debug.Log($"Cutoff up: {upCutOff}");
+        Debug.Log($"Cutoff down : {downCutOff}");
+
+        Debug.Log($"screenPos.x: {screenPos.x}");
+        Debug.Log($"screenPos.y: {screenPos.y}");
+        */
+        #endregion
+
+        if (screenPos.x < leftCutOff || screenPos.x > rightCutOff) { return true; }
+        if (screenPos.y < downCutOff || screenPos.y > upCutOff) { return true; }
+
+        return false;
+
+    }
+
+
     public void CreateTile(int q, int r, GridTile tile)
     {
         RemoveTile(q, r);
@@ -130,14 +162,15 @@ public class LevelEditManager : Singleton<LevelEditManager>
         string tileName = GridTile.GetStringFromCoords(q, r);
         GameObject obj = GameObject.Find(tileName);
 
-        if(levelObjects.Contains(obj))
+        if (levelObjects.Contains(obj))
         {
             levelObjects.Remove(obj);
         }
 
         Destroy(obj);
 
-        if(levelBeingEdited.tiles.ContainsKey(tileName)){
+        if (levelBeingEdited.tiles.ContainsKey(tileName))
+        {
             levelBeingEdited.tiles.Remove(tileName);
         }
     }
@@ -152,7 +185,9 @@ public class LevelEditManager : Singleton<LevelEditManager>
         Vector2 worldPos = GridLayoutRules.GetPositionForFlatTopTile(levelBeingEdited.layoutData, q, r);
         GameObject unitObj = Instantiate(unitPrefab, worldPos, Quaternion.identity);
         Unit unitScr = unitObj.GetComponent<Unit>();
-        unitScr.data= data;
+        unitScr.data = data;
+        unitScr.unitID = Guid.NewGuid().ToString();
+        unitObj.transform.name = unitScr.unitID;
     }
 
     public void RemoveUnit(int q, int r)
