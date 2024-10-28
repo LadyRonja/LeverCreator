@@ -31,7 +31,7 @@ public class UnitMovementHandler : Singleton<UnitMovementHandler>
         }
 
         unitToMove.transform.position = endPos;
-        if (!ActiveLevelManager.Instance.TryMoveUnit(unitToMove, toTile))
+        if (!ActiveLevelManager.Instance.TryMoveUnit(unitToMove.data, toTile))
         {
             Debug.LogError("Unable to move unit along predicted path!");
         }

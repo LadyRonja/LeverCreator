@@ -8,9 +8,9 @@ public class Unit : MonoBehaviour
     public SpriteRenderer myRenderer;
     public string unitID = "";
 
-    private void Awake()
+    private void Start()
     {
-        if(data == null) data = ScriptableObject.CreateInstance<UnitData>();
+        if (data == null) { Debug.Log("generating new data"); data = ScriptableObject.CreateInstance<UnitData>(); }
         if (myRenderer == null) return;
 
         if(Random.Range(0, 3) == 1)
@@ -22,5 +22,6 @@ public class Unit : MonoBehaviour
             myRenderer.color = Color.green;
         else
             myRenderer.color = Color.red;
+
     }
 }

@@ -12,7 +12,7 @@ public class GridGenerator : MonoBehaviour
     public GameObject unitPrefab;
 
     Dictionary<string, GridTile> tiles = new();
-    Dictionary<string, Unit> units = new();
+    Dictionary<string, UnitData> units = new();
 
     Vector3 startPos;
     float tileWidth;
@@ -66,12 +66,13 @@ public class GridGenerator : MonoBehaviour
                 Vector2 unitPos = GridLayoutRules.GetPositionForFlatTopTile(layoutData, q, r);
                 GameObject unitObj = Instantiate(unitPrefab, unitPos, Quaternion.identity);
                 Unit unitScr = unitObj.GetComponent<Unit>();
+                unitScr.data = ScriptableObject.CreateInstance<UnitData>();
                 
                 string unitPosString = GridTile.GetStringFromCoords(q, r);
                 unitScr.unitID = Guid.NewGuid().ToString();
                 
                 unitObj.transform.name = unitScr.unitID;
-                units.Add(unitPosString, unitScr);
+                units.Add(unitPosString, unitScr.data);
             }
         }
     }

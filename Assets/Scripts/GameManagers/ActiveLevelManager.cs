@@ -19,7 +19,7 @@ public class ActiveLevelManager : Singleton<ActiveLevelManager>
         activeLevel = levelToSetActive;
     }
 
-    public bool TryMoveUnit(Unit unit, GridTile toTile, bool force = false)
+    public bool TryMoveUnit(UnitData unit, GridTile toTile, bool force = false)
     {
         if (activeLevel == null) { return false; }
         if (GridInformant.instance.TryGetUnit(toTile.q, toTile.r, out _) && !force) { return false; }

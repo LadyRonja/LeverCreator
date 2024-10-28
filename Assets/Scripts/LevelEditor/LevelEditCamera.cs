@@ -13,6 +13,8 @@ public class LevelEditCamera : MonoBehaviour
     Vector3 mouseStartPos = Vector3.zero;
     Camera myCam;
 
+    public bool invertDrag = false;
+
     private void Start()
     {
         startPos = transform.position;
@@ -38,8 +40,14 @@ public class LevelEditCamera : MonoBehaviour
             Vector3 dir = (mouseStartPos - Input.mousePosition);
 
             Vector3 newPos = transform.position;
-            newPos.x -= dir.x * moveSpeed * Time.deltaTime;
-            newPos.y -= dir.y * moveSpeed * Time.deltaTime;
+
+            int invertCoefficent = 1;
+            if(invertDrag)
+            {
+                invertCoefficent = -1;
+            }
+            newPos.x += dir.x * moveSpeed * Time.deltaTime * invertCoefficent;
+            newPos.y += dir.y * moveSpeed * Time.deltaTime * invertCoefficent;
 
             transform.position = newPos;
         }

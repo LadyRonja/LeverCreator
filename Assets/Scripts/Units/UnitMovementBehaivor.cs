@@ -10,14 +10,14 @@ public static class UnitMovementBehaivor
         List<GridTile> output = new();
 
         // Find target
-        List<Unit> allPlayerUnits = ActiveLevelManager.Instance.ActiveLevel.units.Values.Where(u => u.data.controlledByPlayer).ToList();
+        List<UnitData> allPlayerUnits = ActiveLevelManager.Instance.ActiveLevel.units.Values.Where(u => u.controlledByPlayer).ToList();
 
         if (allPlayerUnits.Count == 0) { return output; }
 
         // See how far away the first one is
-        Unit nearestFoundUnit = allPlayerUnits[0];
-        _ = GridInformant.Instance.TryGetTileFromUnit(fromUnit, out GridTile fromTile);
-        _ = GridInformant.Instance.TryGetTileFromUnit(nearestFoundUnit, out GridTile toTile);
+        if (!GridInformant.Instance.TryGetUnit(allPlayerUnits[0], out Unit nearestFoundUnit)) { Debug.LogError("Unit not loaded in world"); return output; }
+        _ = GridInformant.Instance.TryGetTileFromUnit(fromUnit.data, out GridTile fromTile);
+        _ = GridInformant.Instance.TryGetTileFromUnit(nearestFoundUnit.data, out GridTile toTile);
 
         int nearestDistance = int.MaxValue;
         List<GridTile> path = Pathfinder.FindPath(fromTile, toTile);
@@ -41,7 +41,7 @@ public static class UnitMovementBehaivor
             {
                 nearestDistance = dist;
                 path = newPath;
-                nearestFoundUnit = allPlayerUnits[i];
+               _ = GridInformant.Instance.TryGetUnit(allPlayerUnits[i], out nearestFoundUnit);
             }
         }
 

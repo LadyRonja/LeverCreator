@@ -75,7 +75,7 @@ public class PlayerTurnHandler : Singleton<PlayerTurnHandler>
     private void TryToMoveSelectedUnit(GridTile toTile)
     {
         inputEnabled = false;
-        if(!GridInformant.Instance.TryGetTileFromUnit(selectedUnit, out GridTile fromTile)) { inputEnabled = true; return; }
+        if(!GridInformant.Instance.TryGetTileFromUnit(selectedUnit.data, out GridTile fromTile)) { inputEnabled = true; return; }
 
         List<GridTile> path = Pathfinder.FindPath(fromTile, toTile);
         if(path == null) { inputEnabled = true; selectedUnit = null; return; }

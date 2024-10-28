@@ -17,9 +17,13 @@ public class LevelEditManager : Singleton<LevelEditManager>
     public GridLayers editLayer = GridLayers.TERRAIN;
     Dictionary<(ClickMode, GridLayers), EditMode> editModes = new();
 
+    [HideInInspector] public EditAdditionManager additionManager;
+    [HideInInspector] public EditRemovalManager removalManager;
+
     LevelData levelBeingEdited = null;
-    [SerializeField] GameObject tempTilePrefab; //temp solution
     public LevelData LevelBeingEdited { get => levelBeingEdited; private set => levelBeingEdited = value; }
+    
+    [SerializeField] GameObject tempTilePrefab; //temp solution
     List<GameObject> levelObjects = new();
 
     protected override void Awake()
@@ -48,9 +52,14 @@ public class LevelEditManager : Singleton<LevelEditManager>
 
     private void SetUpEditModes()
     {
+        additionManager = EditAdditionManager.Instance;
+        additionManager.editor = this;
+        removalManager = EditRemovalManager.Instance;
+        removalManager.editor = this;
+
         editModes.Clear();
-        editModes.Add((ClickMode.ADD, GridLayers.TERRAIN), () => tempAddGround());
-        editModes.Add((ClickMode.REMOVE, GridLayers.TERRAIN), () => tempRemoveGround());
+        editModes.Add((ClickMode.ADD, GridLayers.TERRAIN), () => additionManager.AddGround());
+        editModes.Add((ClickMode.REMOVE, GridLayers.TERRAIN), () => removalManager.RemoveGround());
     }
 
     private void SetUpLevel()
@@ -96,30 +105,6 @@ public class LevelEditManager : Singleton<LevelEditManager>
         }
 
         levelBeingEdited = null;
-    }
-
-    public void ToggleGround()
-    {
-        Debug.Log("We toggling the ground!");
-    }
-
-    public void tempAddGround()
-    {
-        Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        (int q, int r, _) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(levelBeingEdited.layoutData, worldPos);
-
-        GridTile tileToPlace = new(q, r);
-        PlaceTileCommand c = new PlaceTileCommand(tileToPlace);
-        c.Execute();
-    }
-
-    public void tempRemoveGround()
-    {
-        Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        (int q, int r, _) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(levelBeingEdited.layoutData, worldPos);
-
-        RemoveTileCommand c = new(q, r);
-        c.Execute();
     }
 
     public void CreateTile(int q, int r, GridTile tile)

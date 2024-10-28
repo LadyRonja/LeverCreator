@@ -10,6 +10,7 @@ public enum NeighbourDirections { NW, N, NE, SE, S, SW}
 public class GridInformant : Singleton<GridInformant>
 {
     LevelData activeLevel;
+
     Dictionary<NeighbourDirections, (int q, int r)> relationalCoordsLookupTable = new(){
                                                     { NeighbourDirections.NW, (-1, 1) },
                                                     { NeighbourDirections.N, (0, 1) },
@@ -97,7 +98,7 @@ public class GridInformant : Singleton<GridInformant>
         return GridLayoutRules.GetPositionForFlatTopTile(activeLevel.layoutData, tile.q, tile.r);
     }
 
-    public bool TryGetTileFromUnit(Unit fromUnit, out GridTile tile)
+    public bool TryGetTileFromUnit(UnitData fromUnit, out GridTile tile)
     {
         tile = null;
         if(activeLevel == null) { return false;}
@@ -130,13 +131,30 @@ public class GridInformant : Singleton<GridInformant>
         unit = null;
         if(activeLevel == null) { return false; }
 
-        return activeLevel.units.TryGetValue(GridTile.GetStringFromCoords(q ,r), out unit);
+
+        if(activeLevel.units.TryGetValue(GridTile.GetStringFromCoords(q ,r), out UnitData ud))
+        {
+            unit = FindObjectsOfType<Unit>().First(u => u.data == ud);
+            if(unit == null) { Debug.LogError("Unit does not exist in-world"); return false; }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public bool TryGetUnit(GridTile onTile, out Unit unit)
     {
         unit = null;
         return TryGetUnit(onTile.q, onTile.r, out unit);
+    }
+
+    public bool TryGetUnit(UnitData unitData, out Unit unit)
+    {
+        unit = FindObjectsOfType<Unit>().First(u => u.data == unitData);
+        if (unit == null) { Debug.LogError("Unit does not exist in-world"); return false; }
+        return true;
     }
     #endregion
 }
