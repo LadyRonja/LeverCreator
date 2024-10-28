@@ -22,17 +22,17 @@ public class EditLayerDropdown : MonoBehaviour
             editLayerDropdown = GetComponent<TMP_Dropdown>();
         }
 
-        List<TMP_Dropdown.OptionData> drawStyleOptions = new();
+        List<TMP_Dropdown.OptionData> layersOptions = new();
         string[] drawStyles = Enum.GetNames(typeof(GridLayers));
 
         for (int i = 0; i < drawStyles.Length; i++)
         {
             TMP_Dropdown.OptionData option = new TMP_Dropdown.OptionData();
             option.text = drawStyles[i];
-            drawStyleOptions.Add(option);
+            layersOptions.Add(option);
         }
 
-        editLayerDropdown.options = drawStyleOptions;
+        editLayerDropdown.options = layersOptions;
     }
 
     private void UpdateEditorLayerOnSelect()

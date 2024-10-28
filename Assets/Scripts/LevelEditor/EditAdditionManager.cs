@@ -5,6 +5,19 @@ using UnityEngine;
 public class EditAdditionManager : Singleton<EditAdditionManager> 
 {
     [HideInInspector] public LevelEditManager editor;
+    UnitData[] unitDataPrefabs = null;
+    [HideInInspector] public int selectedUnitIndex = 0;
+
+    private void Start()
+    {
+        SetUp();
+    }
+
+    private void SetUp()
+    {
+        unitDataPrefabs = Resources.LoadAll<UnitData>(Paths.UnitDataFolderPath);
+        if(unitDataPrefabs == null ) { Debug.LogError("No unit data found"); }
+    }
 
     public void AddGround()
     {
@@ -17,9 +30,12 @@ public class EditAdditionManager : Singleton<EditAdditionManager>
 
     public void AddUnit()
     {
+        if(unitDataPrefabs == null) { return; }
+        if(selectedUnitIndex >= unitDataPrefabs.Length) { return; }
+
         (int q, int r) = GetCoordsFromMousePos();
 
-        UnitData newUnitData = ScriptableObject.CreateInstance<UnitData>();
+        UnitData newUnitData = Instantiate(unitDataPrefabs[selectedUnitIndex]);
         PlaceUnitCommand c = new PlaceUnitCommand(q, r, newUnitData);
         c.Execute();
     }

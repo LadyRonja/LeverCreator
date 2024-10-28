@@ -22,17 +22,17 @@ public class EditModesDropdown : MonoBehaviour
             editModesDropdown = GetComponent<TMP_Dropdown>();
         }
 
-        List<TMP_Dropdown.OptionData> drawStyleOptions = new();
+        List<TMP_Dropdown.OptionData> editStyleOptions = new();
         string[] drawStyles = Enum.GetNames(typeof(ClickMode));
 
         for (int i = 0; i < drawStyles.Length; i++)
         {
             TMP_Dropdown.OptionData option = new TMP_Dropdown.OptionData();
             option.text = drawStyles[i];
-            drawStyleOptions.Add(option);
+            editStyleOptions.Add(option);
         }
 
-        editModesDropdown.options = drawStyleOptions;
+        editModesDropdown.options = editStyleOptions;
     }
 
     private void UpdateEditorModeOnSelect()
