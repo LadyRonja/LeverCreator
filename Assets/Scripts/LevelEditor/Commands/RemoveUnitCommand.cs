@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-public class PlaceUnitCommand : Command
+public class RemoveUnitCommand : Command
 {
     int q;
     int r;
-    UnitData data;
     UnitData oldData;
 
-    public PlaceUnitCommand(int q, int r, UnitData data)
+    public RemoveUnitCommand(int q, int r)
     {
         this.q = q;
         this.r = r;
-        this.data = data;
     }
 
     public override void Execute()
@@ -23,16 +21,16 @@ public class PlaceUnitCommand : Command
 
         LevelEditManager editor = LevelEditManager.Instance;
 
-        string coords = GridTile.GetStringFromCoords(q, r);
-        _ = editor.LevelBeingEdited.units.TryGetValue(coords, out oldData);
-
-        editor.CreateUnit(q, r, data);
+        if (editor.LevelBeingEdited.units.TryGetValue(GridTile.GetStringFromCoords(q, r), out oldData))
+        {
+            editor.RemoveUnit(q, r);
+        }
     }
 
     public override void Undo()
     {
-        LevelEditManager.Instance.RemoveUnit(q, r);
         if (oldData == null) { return; }
+
         LevelEditManager.Instance.CreateUnit(q, r, oldData);
     }
 }

@@ -18,7 +18,6 @@ public class EnemyTurnHandler : Singleton<EnemyTurnHandler>
     private IEnumerator MoveEachAIUnit()
     {
         List<Unit> allAIUnits = FindObjectsOfType<Unit>().Where(u => !u.data.controlledByPlayer).ToList();
-        Debug.Log("allAIUnits.Count: " + allAIUnits.Count);
 
         foreach (Unit unit in allAIUnits)
         {

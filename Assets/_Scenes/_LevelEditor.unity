@@ -151,11 +151,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1e31b03a8a137242989ed9e7fb4fb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  editMethod: 1
-  editLayer: 0
+  editMethod: 0
+  editLayer: 1
   additionManager: {fileID: 0}
   removalManager: {fileID: 0}
-  tempTilePrefab: {fileID: 7594227454506355495, guid: f3fb14b07f19086478a5b1eec19bf415, type: 3}
+  tilePrefab: {fileID: 7594227454506355495, guid: f3fb14b07f19086478a5b1eec19bf415, type: 3}
+  unitPrefab: {fileID: 4374000471324478057, guid: de236b7b5da345b4e89c01852f985bf1, type: 3}
 --- !u!4 &505664464
 Transform:
   m_ObjectHideFlags: 0

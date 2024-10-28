@@ -8,8 +8,7 @@ public class EditAdditionManager : Singleton<EditAdditionManager>
 
     public void AddGround()
     {
-        Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        (int q, int r, _) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(editor.LevelBeingEdited.layoutData, worldPos);
+        (int q, int r) = GetCoordsFromMousePos();
 
         GridTile tileToPlace = new(q, r);
         PlaceTileCommand c = new PlaceTileCommand(tileToPlace);
@@ -18,6 +17,17 @@ public class EditAdditionManager : Singleton<EditAdditionManager>
 
     public void AddUnit()
     {
+        (int q, int r) = GetCoordsFromMousePos();
 
+        UnitData newUnitData = ScriptableObject.CreateInstance<UnitData>();
+        PlaceUnitCommand c = new PlaceUnitCommand(q, r, newUnitData);
+        c.Execute();
+    }
+
+    private (int q, int r) GetCoordsFromMousePos()
+    {
+        Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        (int _q, int _r, _) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(editor.LevelBeingEdited.layoutData, worldPos);
+        return (_q, _r);
     }
 }
