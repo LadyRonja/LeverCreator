@@ -299,6 +299,7 @@ MonoBehaviour:
   zoomSpeed: 10
   zoomOuterBound: 300
   zoomInnerBound: 10
+  invertDrag: 0
 --- !u!1 &702887818
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,6 +467,7 @@ MonoBehaviour:
   debugHeight: 15
   tilePrefab: {fileID: 7594227454506355495, guid: f3fb14b07f19086478a5b1eec19bf415, type: 3}
   unitPrefab: {fileID: 4374000471324478057, guid: de236b7b5da345b4e89c01852f985bf1, type: 3}
+  levelDataFile: {fileID: 4900000, guid: cc86c3d86cc153d43aa65a937c1394fb, type: 3}
 --- !u!4 &838069133
 Transform:
   m_ObjectHideFlags: 0

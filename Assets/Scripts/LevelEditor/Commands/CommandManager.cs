@@ -21,4 +21,9 @@ public class CommandManager : Singleton<CommandManager>
             history.Pop();
         }
     }
+
+    public void ClearHistory()
+    {
+        history.Clear();
+    } 
 }

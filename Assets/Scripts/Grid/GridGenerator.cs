@@ -2,109 +2,86 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Windows;
 
-public class GridGenerator : MonoBehaviour
+public class GridGenerator : Singleton<GridGenerator>
 {
-    public int debugWidth = 10;
-    public int debugHeight = 15;
     public GameObject tilePrefab;
     public GameObject unitPrefab;
 
-    Dictionary<string, GridTile> tiles = new();
-    Dictionary<string, UnitData> units = new();
-
-    Vector3 startPos;
-    float tileWidth;
-    float tileHeight;
-    GridLayoutRules.LayoutData layoutData;
+    [SerializeField] TextAsset levelDataFile;
 
     private void Start()
     {
-        SetUp();
-        GenerateGrid();
-        tempGenerateUnits();
-
-        LevelData activeLevel = new();
-        activeLevel.tiles = tiles;
-        activeLevel.units = units;
-        activeLevel.layoutData = layoutData;
-
-        GridInformant.Instance.SetActiveGrid(activeLevel);
-        ActiveLevelManager.Instance.SetActiveGrid(activeLevel);
-    }
-
-    private void GenerateGrid()
-    {
-        tiles = new();
-
-        for (int q = 0; q < debugWidth; q++)
+        if (tilePrefab == null || unitPrefab == null)
         {
-            for (int r = 0; r < debugHeight; r++)
-            {
-                Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(layoutData, q, r);
-                GridTile newTile = new GridTile(q, r);
-
-                GameObject tile = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
-
-                tile.transform.name = $"{newTile.coords}";
-                tiles.Add(newTile.coords, newTile);
-            }
+            Debug.LogError("GridGenerator Requires proper initialization");
         }
+
+        /*
+        LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(levelDataFile.text);
+        GridInformant.Instance.SetActiveGrid(levelToLoad);
+        ActiveLevelManager.Instance.SetActiveGrid(levelToLoad);
+        
+        GenerateFromJson(levelDataFile.text);
+        */
     }
 
-    private void tempGenerateUnits()
+    public void Initialize(GameObject tilePrefab, GameObject unitPrefab)
     {
-        units = new();
+        this.tilePrefab = tilePrefab;
+        this.unitPrefab = unitPrefab;
+    }
 
-        for (int q = 0; q < debugWidth; q++)
+    public List<GameObject> GenerateFromJson(string level)
+    {
+        LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(level);
+        List<GameObject> levelObjects = new();
+
+        foreach (GridTile t in levelToLoad.tiles.Values)
         {
-            for (int r = 0; r < debugHeight; r++)
-            {
-                if (q != r) continue;
-
-                Vector2 unitPos = GridLayoutRules.GetPositionForFlatTopTile(layoutData, q, r);
-                GameObject unitObj = Instantiate(unitPrefab, unitPos, Quaternion.identity);
-                Unit unitScr = unitObj.GetComponent<Unit>();
-                unitScr.data = ScriptableObject.CreateInstance<UnitData>();
-                
-                string unitPosString = GridTile.GetStringFromCoords(q, r);
-                unitScr.unitID = Guid.NewGuid().ToString();
-                
-                unitObj.transform.name = unitScr.unitID;
-                units.Add(unitPosString, unitScr.data);
-            }
+            levelObjects.Add(CreateTile(t.q, t.r, t, levelToLoad.layoutData));
         }
-    }
 
-    private void GenerateFromJson(string level)
-    {
-        var dictTiles = (Dictionary<string, GridTile>)JsonConvert.DeserializeObject<Dictionary<string, GridTile>>(level);
-        Vector3 startPos = transform.position;
-        GameObject temp = Instantiate(tilePrefab, startPos, Quaternion.identity, this.transform);
-        SpriteRenderer sr = temp.GetComponent<SpriteRenderer>();
-        float tileWidth = sr.bounds.size.x;
-        float tileHeight = sr.bounds.size.y;
-        GridLayoutRules.LayoutData tileData = new GridLayoutRules.LayoutData(startPos, tileWidth, tileHeight);
-        Destroy(temp);
-
-        foreach (GridTile t in dictTiles.Values)
+        foreach (UnitData ud in levelToLoad.units.Values)
         {
-            Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(tileData, t.q, t.r);
+            (int q, int r, _) = GridTile.GetCoordsFromCoordString(levelToLoad.units.First(u => u.Value == ud).Key);
 
-            GameObject tile = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
-            tile.transform.name = $"Hex ({t.coords})";
+            Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(levelToLoad.layoutData, q, r);
+            GameObject unitObj = Instantiate(unitPrefab, tilePos, Quaternion.identity);
+            Unit unitScr = unitObj.GetComponent<Unit>();
+            unitScr.data = ud;
+            unitScr.unitID = Guid.NewGuid().ToString();
+            unitObj.name = unitScr.unitID;
+
+            levelObjects.Add(unitObj);
         }
+
+        return levelObjects;
     }
 
-    private void SetUp()
+    public GameObject CreateTile(int q, int r, GridTile tile, GridLayoutRules.LayoutData layoutRules)
     {
-        startPos = transform.position;
-        GameObject temp = Instantiate(tilePrefab, startPos, Quaternion.identity, this.transform);
-        SpriteRenderer sr = temp.GetComponent<SpriteRenderer>();
-        tileWidth = sr.bounds.size.x;
-        tileHeight = sr.bounds.size.y;
-        layoutData = new GridLayoutRules.LayoutData(startPos, tileWidth, tileHeight);
-        Destroy(temp);
+        Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(layoutRules, q, r);
+        GameObject newTileObj = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
+        newTileObj.transform.name = tile.coords;
+
+        return newTileObj;
+    }
+
+    public GameObject CreateUnit(int q, int r, UnitData data, GridLayoutRules.LayoutData layoutRules)
+    {
+        string coords = GridTile.GetStringFromCoords(q, r);
+
+        Vector2 worldPos = GridLayoutRules.GetPositionForFlatTopTile(layoutRules, q, r);
+        GameObject unitObj = Instantiate(unitPrefab, worldPos, Quaternion.identity);
+        Unit unitScr = unitObj.GetComponent<Unit>();
+        unitScr.data = data;
+        unitScr.unitID = Guid.NewGuid().ToString();
+        unitObj.transform.name = unitScr.unitID;
+
+        return unitObj;
     }
 }

@@ -23,7 +23,7 @@ public class Unit : MonoBehaviour
         }
 
         if (data.controlledByPlayer)
-            myRenderer.color = Color.green;
+            myRenderer.color = Color.blue;
         else
             myRenderer.color = Color.red;
 

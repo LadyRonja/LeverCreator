@@ -2,10 +2,12 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
-using static GridLayoutRules;
 
 public enum ClickMode { ADD, REMOVE };
 public enum GridLayers { TERRAIN, UNIT};
@@ -33,7 +35,8 @@ public class LevelEditManager : Singleton<LevelEditManager>
         base.Awake();
 
         SetUpEditModes();
-        SetUpLevel();
+        SetUpFreshStart();
+        GridGenerator.Instance.Initialize(tilePrefab, unitPrefab);
     }
 
     private void Update()
@@ -68,7 +71,7 @@ public class LevelEditManager : Singleton<LevelEditManager>
         editModes.Add((ClickMode.REMOVE, GridLayers.UNIT), () => removalManager.RemoveUnit());
     }
 
-    private void SetUpLevel()
+    private void SetUpFreshStart()
     {
         levelBeingEdited = new();
 
@@ -88,21 +91,15 @@ public class LevelEditManager : Singleton<LevelEditManager>
         GridInformant.Instance.SetActiveGrid(levelBeingEdited);
     }
 
-    public void LoadLevelFromData(string levelData)
+    public void LoadLevelFromData(string levelJSON)
     {
         UnloadActiveLevel();
-
-        LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(levelData);
-
+        LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(levelJSON);
         levelBeingEdited = levelToLoad;
-        foreach (GridTile t in levelToLoad.tiles.Values)
-        {
-            Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(levelToLoad.layoutData, t.q, t.r);
 
-            GameObject tile = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
-            tile.transform.name = t.coords;
-            levelObjects.Add(tile);
-        }
+        levelObjects = GridGenerator.Instance.GenerateFromJson(levelJSON);
+
+        CommandManager.Instance.ClearHistory();
     }
 
     private void UnloadActiveLevel()
@@ -113,6 +110,17 @@ public class LevelEditManager : Singleton<LevelEditManager>
         }
 
         levelBeingEdited = null;
+    }
+
+    public void SaveActiveLevel(string asName)
+    {
+        string stringyfiedLevelData = JsonConvert.SerializeObject(levelBeingEdited);
+
+        File.WriteAllText(Application.dataPath + "/Resources/Levels/" + asName + ".txt", stringyfiedLevelData);
+
+        AssetDatabase.Refresh();
+
+        Debug.Log("Level Saved!");
     }
 
     private bool ClickIsAtEdge(Vector2 screenPos)
@@ -147,14 +155,8 @@ public class LevelEditManager : Singleton<LevelEditManager>
     public void CreateTile(int q, int r, GridTile tile)
     {
         RemoveTile(q, r);
-
         levelBeingEdited.tiles.Add(tile.coords, tile);
-
-        Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(levelBeingEdited.layoutData, q, r);
-        GameObject newTileObj = Instantiate(tilePrefab, tilePos, Quaternion.identity, this.transform);
-        newTileObj.transform.name = tile.coords;
-
-        levelObjects.Add(newTileObj);
+        levelObjects.Add(GridGenerator.Instance.CreateTile(q, r, tile, levelBeingEdited.layoutData));
     }
 
     public void RemoveTile(int q, int r)
@@ -182,12 +184,7 @@ public class LevelEditManager : Singleton<LevelEditManager>
         string coords = GridTile.GetStringFromCoords(q, r);
         levelBeingEdited.units.Add(coords, data);
 
-        Vector2 worldPos = GridLayoutRules.GetPositionForFlatTopTile(levelBeingEdited.layoutData, q, r);
-        GameObject unitObj = Instantiate(unitPrefab, worldPos, Quaternion.identity);
-        Unit unitScr = unitObj.GetComponent<Unit>();
-        unitScr.data = data;
-        unitScr.unitID = Guid.NewGuid().ToString();
-        unitObj.transform.name = unitScr.unitID;
+        levelObjects.Add(GridGenerator.Instance.CreateUnit(q, r, data, levelBeingEdited.layoutData));
     }
 
     public void RemoveUnit(int q, int r)
