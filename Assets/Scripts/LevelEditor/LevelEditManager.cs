@@ -115,6 +115,8 @@ public class LevelEditManager : Singleton<LevelEditManager>
             Destroy(go);
         }
 
+        SelectorHighlightManager.Instance.DeselectAll();
+        CommandManager.Instance.ClearHistory();
         levelBeingEdited = null;
     }
 

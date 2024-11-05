@@ -33,9 +33,6 @@ public class SelectorHighlightManager : Singleton<SelectorHighlightManager>
     /// <summary>
     /// NOTE: Does not set highlight sprite, layer, or scale
     /// </summary>
-    /// <param name="q"></param>
-    /// <param name="r"></param>
-    /// <returns></returns>
     private (GameObject o, SpriteRenderer s) CreateHighlightObject(int q, int r)
     {
         string coords = GridTile.GetStringFromCoords(q, r);

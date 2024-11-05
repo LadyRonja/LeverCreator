@@ -39,6 +39,12 @@ public class SelectCommand : Command
                 if(LayerToHighligthFunctionLookUp.TryGetValue(layer, out HighlightFunction functionToCall))
                 {
                     functionToCall(pos.q, pos.r);
+
+                    if(locations.Count == 1 && layers.Contains(GridLayers.UNIT))
+                    {
+                        if (LevelEditManager.Instance.LevelBeingEdited.units.TryGetValue(GridTile.GetStringFromCoords(pos.q, pos.r), out UnitData ud))
+                            EditUnitDataManager.Instance.DisplayData(ud);
+                    }
                 }
             }
         }
