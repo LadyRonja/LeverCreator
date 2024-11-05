@@ -135,7 +135,6 @@ public class GridInformant : Singleton<GridInformant>
         if(activeLevel.units.TryGetValue(GridTile.GetStringFromCoords(q ,r), out UnitData ud))
         {
             unit = FindObjectsOfType<Unit>().FirstOrDefault(u => u.data.unitIDforClonedData == ud.unitIDforClonedData);
-            Debug.Log("test");
             if(unit == null) { Debug.LogError("Unit does not exist in-world"); Debug.Log($"Data: {ud.unitIDforClonedData}"); return false; }
             return true;
         }

@@ -50,7 +50,10 @@ public class SelectCommand : Command
     {
         SelectorHighlightManager.Instance.DeselectAll();
 
-        if(oldLayers == null || oldLayers.Count == 0) { return; }
+        EditSelectionManager.Instance.selectedLocations = new();
+        EditSelectionManager.Instance.selectedLayers = new();
+
+        if (oldLayers == null || oldLayers.Count == 0) { return; }
 
         foreach (var pos in oldLocations)
         {

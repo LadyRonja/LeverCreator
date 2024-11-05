@@ -19,7 +19,8 @@ public class EditSelectionManager : Singleton<EditSelectionManager>
     {
         if(!GridInformant.Instance.TryGetUnit(q, r, out _))
         {
-            Debug.Log("No unit found at that location");
+            DeselectCommand dc = new DeselectCommand();
+            dc.Execute();
             return;
         }
 
@@ -41,6 +42,8 @@ public class EditSelectionManager : Singleton<EditSelectionManager>
     {
         if (!GridInformant.Instance.TileExists(q, r, out _))
         {
+            DeselectCommand dc = new DeselectCommand();
+            dc.Execute();
             return;
         }
 
