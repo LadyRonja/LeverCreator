@@ -35,10 +35,10 @@ public class GridGenerator : Singleton<GridGenerator>
         this.unitPrefab = unitPrefab;
     }
 
-    public List<GameObject> GenerateFromJson(string level)
+    public void GenerateFromJson(string level, out LevelData loadedLevel, out List<GameObject> levelObjects)
     {
         LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(level);
-        List<GameObject> levelObjects = new();
+        levelObjects = new();
 
         foreach (GridTile t in levelToLoad.tiles.Values)
         {
@@ -54,12 +54,13 @@ public class GridGenerator : Singleton<GridGenerator>
             Unit unitScr = unitObj.GetComponent<Unit>();
             unitScr.data = ud;
             unitScr.unitID = Guid.NewGuid().ToString();
+            ud.unitIDforClonedData = unitScr.unitID;
             unitObj.name = unitScr.unitID;
 
             levelObjects.Add(unitObj);
         }
 
-        return levelObjects;
+        loadedLevel = levelToLoad;
     }
 
     public GameObject CreateTile(int q, int r, GridTile tile, GridLayoutRules.LayoutData layoutRules)

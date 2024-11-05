@@ -9,7 +9,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-public enum ClickMode { ADD, REMOVE };
+public enum ClickMode { ADD, REMOVE, SELECT };
 public enum GridLayers { TERRAIN, UNIT};
 
 public delegate void EditMode();
@@ -22,6 +22,7 @@ public class LevelEditManager : Singleton<LevelEditManager>
 
     [HideInInspector] public EditAdditionManager additionManager;
     [HideInInspector] public EditRemovalManager removalManager;
+    [HideInInspector] public EditSelectionManager selectionManager;
 
     LevelData levelBeingEdited = null;
     public LevelData LevelBeingEdited { get => levelBeingEdited; private set => levelBeingEdited = value; }
@@ -63,12 +64,17 @@ public class LevelEditManager : Singleton<LevelEditManager>
         additionManager.editor = this;
         removalManager = EditRemovalManager.Instance;
         removalManager.editor = this;
+        selectionManager = EditSelectionManager.Instance;
+        selectionManager.editor = this;
 
         editModes.Clear();
         editModes.Add((ClickMode.ADD, GridLayers.TERRAIN), () => additionManager.AddGround());
         editModes.Add((ClickMode.REMOVE, GridLayers.TERRAIN), () => removalManager.RemoveGround());
+        editModes.Add((ClickMode.SELECT, GridLayers.TERRAIN), () => selectionManager.SelectTerrain());
+
         editModes.Add((ClickMode.ADD, GridLayers.UNIT), () => additionManager.AddUnit());
         editModes.Add((ClickMode.REMOVE, GridLayers.UNIT), () => removalManager.RemoveUnit());
+        editModes.Add((ClickMode.SELECT, GridLayers.UNIT), () => selectionManager.SelectUnit());
     }
 
     private void SetUpFreshStart()
@@ -89,17 +95,17 @@ public class LevelEditManager : Singleton<LevelEditManager>
         levelObjects = new();
 
         GridInformant.Instance.SetActiveGrid(levelBeingEdited);
+        ActiveLevelManager.Instance.SetActiveGrid(levelBeingEdited);
     }
 
     public void LoadLevelFromData(string levelJSON)
     {
         UnloadActiveLevel();
-        LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(levelJSON);
-        levelBeingEdited = levelToLoad;
 
-        levelObjects = GridGenerator.Instance.GenerateFromJson(levelJSON);
+        GridGenerator.Instance.GenerateFromJson(levelJSON, out levelBeingEdited, out levelObjects);
 
         CommandManager.Instance.ClearHistory();
+        GridInformant.Instance.SetActiveGrid(levelBeingEdited);
     }
 
     private void UnloadActiveLevel()
