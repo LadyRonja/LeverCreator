@@ -1,10 +1,18 @@
+using System;
 using UnityEngine;
-using UnityEngine.Timeline;
 
 [CreateAssetMenu(fileName = "Unit Data", menuName = "Scriptable Objects/Unit Data", order = 1)]
-public class UnitData : ScriptableObject
+public class UnitData : IDdScriptableObject
 {
+    [Header("Game Info")]
     public string unitName = "UNNAMED UNIT DATA";
-    [HideInInspector] public string unitIDforClonedData = "DO NOT FILL";
     public bool controlledByPlayer = true;
+    public int maxHealth = 15;
+    public int curHealth = 15;
+    public int moveRange = 3;
+    public int maxMana = 4;
+
+    [Header("Development tools")]
+    public bool aquireDefaultValueOnLoad = true;
+    [HideInInspector] public string unitIDforClonedData = "DO NOT ALTER IN EDITOR";
 }

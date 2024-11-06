@@ -3,7 +3,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Windows;
 
 public class GridGenerator : Singleton<GridGenerator>
@@ -20,13 +22,13 @@ public class GridGenerator : Singleton<GridGenerator>
             Debug.LogError("GridGenerator Requires proper initialization");
         }
 
-        /*
+        if(SceneManager.GetActiveScene().name != "_GameScene") { return; }
         LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(levelDataFile.text);
         GridInformant.Instance.SetActiveGrid(levelToLoad);
         ActiveLevelManager.Instance.SetActiveGrid(levelToLoad);
         
-        GenerateFromJson(levelDataFile.text);
-        */
+        GenerateFromJson(levelDataFile.text, out _, out _);
+        
     }
 
     public void Initialize(GameObject tilePrefab, GameObject unitPrefab)
@@ -45,19 +47,41 @@ public class GridGenerator : Singleton<GridGenerator>
             levelObjects.Add(CreateTile(t.q, t.r, t, levelToLoad.layoutData));
         }
 
+        List<(string, UnitData)> loadedDefaultDataReplacements = new();
         foreach (UnitData ud in levelToLoad.units.Values)
         {
             (int q, int r, _) = GridTile.GetCoordsFromCoordString(levelToLoad.units.First(u => u.Value == ud).Key);
 
+            UnitData dataToLoad = ud;
+
+            if (ud.aquireDefaultValueOnLoad)
+            {
+                UnitData[] allData = Resources.LoadAll<UnitData>(Paths.UnitDataFolderPath);
+                UnitData defaultData = allData.FirstOrDefault(u => u.AssetID == ud.AssetID);
+                if (defaultData == null) { Debug.LogError("MISSING DEFAULT DATA"); goto NoDefaultData; }
+
+                string key = GridTile.GetStringFromCoords(q, r);
+                loadedDefaultDataReplacements.Add((key, defaultData));
+                dataToLoad = defaultData;
+            }
+
+            NoDefaultData:
             Vector2 tilePos = GridLayoutRules.GetPositionForFlatTopTile(levelToLoad.layoutData, q, r);
             GameObject unitObj = Instantiate(unitPrefab, tilePos, Quaternion.identity);
             Unit unitScr = unitObj.GetComponent<Unit>();
-            unitScr.data = ud;
+            unitScr.data = dataToLoad;
             unitScr.unitID = Guid.NewGuid().ToString();
-            ud.unitIDforClonedData = unitScr.unitID;
+            dataToLoad.unitIDforClonedData = unitScr.unitID;
             unitObj.name = unitScr.unitID;
 
             levelObjects.Add(unitObj);
+        }
+
+        for (int i = 0; i < loadedDefaultDataReplacements.Count; i++)
+        {
+            (string key, UnitData data) = loadedDefaultDataReplacements[i];
+            levelToLoad.units.Remove(key);
+            levelToLoad.units.Add(key, data);
         }
 
         loadedLevel = levelToLoad;

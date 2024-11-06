@@ -12,5 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41dd78342b4f7fb4291820c0a4cc3952, type: 3}
   m_Name: EnemyUnit
   m_EditorClassIdentifier: 
+  AssetID: 3f1da868-b32f-45be-81c7-d009df96e114
   unitName: Enemy Unit
   controlledByPlayer: 0
+  maxHealth: 15
+  curHealth: 15
+  moveRange: 2
+  maxMana: 4
+  aquireDefaultValueOnLoad: 1
+  unitIDforClonedData: c8a37441-3583-433d-a1c5-ecb833d61e08
