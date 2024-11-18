@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using static UnityEditor.FilePathAttribute;
 
 public class DeselectCommand : Command
 {
     HashSet<(int q, int r)> oldLocations;
     HashSet<GridLayers> oldLayers;
+    UnitData oldData = null;
 
     delegate void HighlightFunction(int q, int r);
     static Dictionary<GridLayers, HighlightFunction> LayerToHighligthFunctionLookUp = new()
@@ -26,11 +26,25 @@ public class DeselectCommand : Command
         EditSelectionManager.Instance.selectedLocations = new();
         EditSelectionManager.Instance.selectedLayers = new();
 
+        if(oldLocations.Count == 1 && oldLayers.Contains(GridLayers.UNIT))
+        {
+            (int oldQ, int oldR) = oldLocations.First(a => true);
+            if(GridInformant.Instance.TryGetUnit(oldQ, oldR, out Unit worldUnit))
+            {
+                oldData = worldUnit.data;
+            }
+        }
+
         SelectorHighlightManager.Instance.DeselectAll();
+        EditorUnitDataUI.Instance.HideUI();
     }
     public override void Undo()
     {
-        if (oldLayers == null || oldLayers.Count == 0) { return; }
+        if (oldLayers == null || oldLayers.Count == 0)
+        {
+            EditorUnitDataUI.Instance.HideUI();
+            return; 
+        }
 
         foreach (var pos in oldLocations)
         {
@@ -41,6 +55,12 @@ public class DeselectCommand : Command
                     functionToCall(pos.q, pos.r);
                 }
             }
+        }
+
+        if(oldData!= null)
+        {
+            EditUnitDataManager.Instance.DisplayData(oldData);
+            EditorUnitDataUI.Instance.DisplayUI();
         }
 
         EditSelectionManager.Instance.selectedLocations = oldLocations;

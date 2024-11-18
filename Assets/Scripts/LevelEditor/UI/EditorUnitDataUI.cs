@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class EditorUnitDataUI : Singleton<EditorUnitDataUI>
 {
+    GameObject displayObj;
     [SerializeField] EditorVariableDataCell dataCellPrefab;
     [Space]
     [SerializeField] Transform variableCellContainer;
@@ -15,6 +16,8 @@ public class EditorUnitDataUI : Singleton<EditorUnitDataUI>
     {
         saveChangesBtn.onClick.AddListener(delegate { EditUnitDataManager.Instance.UpdateData(); });
         discardChangesBtn.onClick.AddListener(delegate { EditUnitDataManager.Instance.DiscardCustomData(); });
+        displayObj = this.transform.GetChild(0).gameObject;
+        HideUI();
     }
 
     public EditorVariableDataCell CreateNewDataCell(string varName, string varType, string varValue)
@@ -37,5 +40,15 @@ public class EditorUnitDataUI : Singleton<EditorUnitDataUI>
         {
             Destroy(child.gameObject);
         }
+    }
+
+    public void DisplayUI()
+    {
+        displayObj.SetActive(true);
+    }
+
+    public void HideUI()
+    {
+        displayObj.SetActive(false);
     }
 }
