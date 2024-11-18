@@ -15,9 +15,9 @@ MonoBehaviour:
   AssetID: 3f1da868-b32f-45be-81c7-d009df96e114
   unitName: Enemy Unit
   controlledByPlayer: 0
-  maxHealth: 15
-  curHealth: 15
-  moveRange: 2
+  maxHealth: 30
+  curHealth: 30
+  moveRange: 1
   maxMana: 4
   aquireDefaultValueOnLoad: 1
-  unitIDforClonedData: c8a37441-3583-433d-a1c5-ecb833d61e08
+  unitIDforClonedData: 31cf6688-d0a4-4b5f-ad13-f256cc57fd04

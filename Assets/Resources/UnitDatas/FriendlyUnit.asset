@@ -15,9 +15,9 @@ MonoBehaviour:
   AssetID: 9c6e1809-6dc6-4a28-b565-faad803a58e5
   unitName: Friendly Unit
   controlledByPlayer: 1
-  maxHealth: 10
-  curHealth: 10
+  maxHealth: 50
+  curHealth: 50
   moveRange: 3
   maxMana: 4
   aquireDefaultValueOnLoad: 1
-  unitIDforClonedData: 5838423f-25e7-4c6d-b56a-6688293c3db6
+  unitIDforClonedData: e70fd93d-ba99-4137-b446-9e9c572293e3

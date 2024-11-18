@@ -179,7 +179,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Save Changes
+  m_text: Save (and keep) Changes
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -206,8 +206,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -365,7 +365,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Discard Changes
+  m_text: Restore Defaults
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1213,6 +1213,8 @@ MonoBehaviour:
   selectionManager: {fileID: 0}
   tilePrefab: {fileID: 7594227454506355495, guid: f3fb14b07f19086478a5b1eec19bf415, type: 3}
   unitPrefab: {fileID: 4374000471324478057, guid: de236b7b5da345b4e89c01852f985bf1, type: 3}
+  graphicsRayCaster: {fileID: 955912654}
+  eventSystem: {fileID: 1125430690}
 --- !u!4 &505664464
 Transform:
   m_ObjectHideFlags: 0
@@ -1452,7 +1454,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 571892825}
   m_OnClick:
     m_PersistentCalls:
@@ -4686,7 +4688,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 1355298333}
   m_OnClick:
     m_PersistentCalls:

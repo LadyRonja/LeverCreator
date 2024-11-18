@@ -8,6 +8,8 @@ using System.Reflection;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public enum ClickMode { ADD, REMOVE, SELECT };
 public enum GridLayers { TERRAIN, UNIT};
@@ -16,8 +18,8 @@ public delegate void EditMode();
 
 public class LevelEditManager : Singleton<LevelEditManager>
 {
-    public ClickMode editMethod = ClickMode.ADD;
-    public GridLayers editLayer = GridLayers.TERRAIN;
+    [HideInInspector] public ClickMode editMethod = ClickMode.ADD;
+    [HideInInspector] public GridLayers editLayer = GridLayers.TERRAIN;
     Dictionary<(ClickMode, GridLayers), EditMode> editModes = new();
 
     [HideInInspector] public EditAdditionManager additionManager;
@@ -30,6 +32,9 @@ public class LevelEditManager : Singleton<LevelEditManager>
     [SerializeField] GameObject tilePrefab;
     [SerializeField] GameObject unitPrefab;
     List<GameObject> levelObjects = new();
+    [Space]
+    [SerializeField] GraphicRaycaster graphicsRayCaster;
+    [SerializeField] EventSystem eventSystem;
 
     protected override void Awake()
     {
@@ -37,7 +42,9 @@ public class LevelEditManager : Singleton<LevelEditManager>
 
         SetUpEditModes();
         SetUpFreshStart();
+        SetUpRaycaster();
         GridGenerator.Instance.Initialize(tilePrefab, unitPrefab);
+
     }
 
     private void Update()
@@ -45,6 +52,7 @@ public class LevelEditManager : Singleton<LevelEditManager>
         if (Input.GetMouseButtonDown((int)MouseButton.Left))
         {
             if (ClickIsAtEdge(Input.mousePosition)) { return; }
+            if (ClickHitUI(Input.mousePosition)) { return; }
 
             if (editModes.TryGetValue((editMethod, editLayer), out EditMode currentMode))
             {
@@ -96,6 +104,24 @@ public class LevelEditManager : Singleton<LevelEditManager>
 
         GridInformant.Instance.SetActiveGrid(levelBeingEdited);
         ActiveLevelManager.Instance.SetActiveGrid(levelBeingEdited);
+    }
+
+    private void SetUpRaycaster()
+    {
+        if (graphicsRayCaster == null)
+        {
+            Debug.Log("Attempting to find graphics raycaster");
+            graphicsRayCaster = FindAnyObjectByType<GraphicRaycaster>();
+            if (graphicsRayCaster != null)  { Debug.Log("Graphics raycaster found"); }
+            else                            { Debug.LogError("Unable to find graphics raycaster"); }
+        }
+        if (eventSystem == null)
+        {
+            Debug.Log("Attempting to find eventSystem");
+            eventSystem = FindAnyObjectByType<EventSystem>();
+            if (eventSystem != null)    { Debug.Log("EventSystem found"); }
+            else                        { Debug.LogError("Unable to find eventSystem"); }
+        }
     }
 
     public void LoadLevelFromData(string levelJSON)
@@ -156,7 +182,20 @@ public class LevelEditManager : Singleton<LevelEditManager>
         if (screenPos.y < downCutOff || screenPos.y > upCutOff) { return true; }
 
         return false;
+    }
 
+    private bool ClickHitUI(Vector2 mousePos)
+    {
+        if (graphicsRayCaster != null && eventSystem != null)
+        {
+            PointerEventData ped = new PointerEventData(eventSystem);
+            ped.position = Input.mousePosition;
+            List<RaycastResult> results = new();
+            graphicsRayCaster.Raycast(ped, results);
+
+            if (results.Count != 0) { return true; }
+        }
+        return false;
     }
 
 

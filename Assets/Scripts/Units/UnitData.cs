@@ -10,7 +10,7 @@ public class UnitData : IDdScriptableObject
     public int maxHealth = 15;
     public int curHealth = 15;
     public int moveRange = 3;
-    public int maxMana = 4;
+    public float maxMana = 4;
 
     [Header("Development tools")]
     public bool aquireDefaultValueOnLoad = true;

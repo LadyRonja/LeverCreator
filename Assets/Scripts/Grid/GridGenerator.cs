@@ -52,7 +52,7 @@ public class GridGenerator : Singleton<GridGenerator>
         {
             (int q, int r, _) = GridTile.GetCoordsFromCoordString(levelToLoad.units.First(u => u.Value == ud).Key);
 
-            UnitData dataToLoad = ud;
+            UnitData dataToLoad = Instantiate(ud);
 
             if (ud.aquireDefaultValueOnLoad)
             {
@@ -60,8 +60,6 @@ public class GridGenerator : Singleton<GridGenerator>
                 UnitData defaultData = allData.FirstOrDefault(u => u.AssetID == ud.AssetID);
                 if (defaultData == null) { Debug.LogError("MISSING DEFAULT DATA"); goto NoDefaultData; }
 
-                string key = GridTile.GetStringFromCoords(q, r);
-                loadedDefaultDataReplacements.Add((key, defaultData));
                 dataToLoad = defaultData;
             }
 
@@ -75,6 +73,10 @@ public class GridGenerator : Singleton<GridGenerator>
             unitObj.name = unitScr.unitID;
 
             levelObjects.Add(unitObj);
+
+
+            string key = GridTile.GetStringFromCoords(q, r);
+            loadedDefaultDataReplacements.Add((key, dataToLoad));
         }
 
         for (int i = 0; i < loadedDefaultDataReplacements.Count; i++)
