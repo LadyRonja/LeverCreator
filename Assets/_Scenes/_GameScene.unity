@@ -465,7 +465,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 7594227454506355495, guid: f3fb14b07f19086478a5b1eec19bf415, type: 3}
   unitPrefab: {fileID: 4374000471324478057, guid: de236b7b5da345b4e89c01852f985bf1, type: 3}
-  levelDataFile: {fileID: 4900000, guid: affb5f4717a9e9446af6aa637833a24f, type: 3}
+  levelDataFile: {fileID: 4900000, guid: b16e2341bcce1f44aaa429e107d5ff04, type: 3}
 --- !u!4 &838069133
 Transform:
   m_ObjectHideFlags: 0

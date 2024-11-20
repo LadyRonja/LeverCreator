@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditorInternal.VR;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -36,6 +37,8 @@ public class LevelEditManager : Singleton<LevelEditManager>
     [SerializeField] GraphicRaycaster graphicsRayCaster;
     [SerializeField] EventSystem eventSystem;
 
+    string lastPosClicked = "";
+
     protected override void Awake()
     {
         base.Awake();
@@ -51,18 +54,36 @@ public class LevelEditManager : Singleton<LevelEditManager>
     {
         if (Input.GetMouseButtonDown((int)MouseButton.Left))
         {
-            if (ClickIsAtEdge(Input.mousePosition)) { return; }
-            if (ClickHitUI(Input.mousePosition)) { return; }
+            AttemptExecuteEdit();
+        }
+        else if (Input.GetMouseButton((int)MouseButton.Left))
+        {
+            string newCoords = ClickToCoords();
+            if (string.Equals(lastPosClicked, newCoords)) { return; }
 
-            if (editModes.TryGetValue((editMethod, editLayer), out EditMode currentMode))
-            {
-                currentMode();
-            }
+            AttemptExecuteEdit();
+        }
+        else if (Input.GetMouseButtonUp((int)MouseButton.Left))
+        {
+            lastPosClicked = "";
         }
 
         if (Input.GetKeyDown(KeyCode.Z))
         {
             CommandManager.Instance.Undo();
+        }
+    }
+
+    private void AttemptExecuteEdit()
+    {
+        if (ClickIsAtEdge(Input.mousePosition)) { lastPosClicked = ""; return; }
+        if (ClickHitUI(Input.mousePosition)) { lastPosClicked = ""; return; }
+
+        if (editModes.TryGetValue((editMethod, editLayer), out EditMode currentMode))
+        {
+            lastPosClicked = ClickToCoords();
+            //Debug.Log($"Pos: {lastPosClicked}, mode: {editMethod}, layer: {editLayer}");
+            currentMode();
         }
     }
 
@@ -198,6 +219,13 @@ public class LevelEditManager : Singleton<LevelEditManager>
         return false;
     }
 
+    private string ClickToCoords()
+    {
+        Vector2 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        (int _q, int _r, _) = GridLayoutRules.GetTileCoordsFromPositionFlatTop(LevelBeingEdited.layoutData, worldPos);
+        string output = GridTile.GetStringFromCoords(_q, _r);
+        return output;
+    } 
 
     public void CreateTile(int q, int r, GridTile tile)
     {

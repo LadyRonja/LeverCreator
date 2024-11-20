@@ -22,12 +22,12 @@ public class GridGenerator : Singleton<GridGenerator>
             Debug.LogError("GridGenerator Requires proper initialization");
         }
 
-        if(SceneManager.GetActiveScene().name != "_GameScene") { return; }
-        LevelData levelToLoad = (LevelData)JsonConvert.DeserializeObject<LevelData>(levelDataFile.text);
-        GridInformant.Instance.SetActiveGrid(levelToLoad);
-        ActiveLevelManager.Instance.SetActiveGrid(levelToLoad);
-        
-        GenerateFromJson(levelDataFile.text, out _, out _);
+        if(SceneManager.GetActiveScene().name != "_GameScene") { return; }     
+
+        GenerateFromJson(levelDataFile.text, out LevelData loadedLevel, out _);
+
+        GridInformant.Instance.SetActiveGrid(loadedLevel);
+        ActiveLevelManager.Instance.SetActiveGrid(loadedLevel);
         
     }
 
@@ -60,7 +60,7 @@ public class GridGenerator : Singleton<GridGenerator>
                 UnitData defaultData = allData.FirstOrDefault(u => u.AssetID == ud.AssetID);
                 if (defaultData == null) { Debug.LogError("MISSING DEFAULT DATA"); goto NoDefaultData; }
 
-                dataToLoad = defaultData;
+                dataToLoad = Instantiate(defaultData);
             }
 
             NoDefaultData:
@@ -107,6 +107,7 @@ public class GridGenerator : Singleton<GridGenerator>
         Unit unitScr = unitObj.GetComponent<Unit>();
         unitScr.data = data;
         unitScr.unitID = Guid.NewGuid().ToString();
+        data.unitIDforClonedData = unitScr.unitID;
         unitObj.transform.name = unitScr.unitID;
 
         return unitObj;
