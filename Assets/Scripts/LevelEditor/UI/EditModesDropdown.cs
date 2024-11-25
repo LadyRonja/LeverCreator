@@ -8,6 +8,17 @@ public class EditModesDropdown : MonoBehaviour
 {
     [SerializeField] TMP_Dropdown editModesDropdown;
     int previousIndex = 0;
+    List<KeyCode> numToKeyCode = new() {
+        KeyCode.Alpha1,
+        KeyCode.Alpha2,
+        KeyCode.Alpha3,
+        KeyCode.Alpha4,
+        KeyCode.Alpha5,
+        KeyCode.Alpha6,
+        KeyCode.Alpha7,
+        KeyCode.Alpha8,
+        KeyCode.Alpha9,
+    };
 
     private void Start()
     {
@@ -28,6 +39,18 @@ public class EditModesDropdown : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             editModesDropdown.value = previousIndex;
+        }
+
+        // B + number to change mode
+        if (!Input.GetKey(KeyCode.B)) { return; }
+        int optionsCount = Math.Min(editModesDropdown.options.Count, 9);
+        for (int i = 0; i < optionsCount; i++)
+        {
+            if (Input.GetKeyDown(numToKeyCode[i]))
+            {
+                editModesDropdown.value = i;
+                break;
+            }
         }
     }
 
