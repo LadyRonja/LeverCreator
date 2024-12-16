@@ -1,13 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 using UnityEngine;
+using System;
 
 public class EnemyTurnHandler : Singleton<EnemyTurnHandler>
 {
-    public void StartTurn()
+    CancellationTokenSource cts = new CancellationTokenSource();
+
+    private void OnDestroy()
     {
-        StartCoroutine(MoveEachAIUnit());
+        cts.Cancel();
+    }
+
+    public async void StartTurn()
+    {
+        await MoveEachAIUnit(cts.Token);
     }
 
     public void EndTurn()
@@ -15,19 +25,24 @@ public class EnemyTurnHandler : Singleton<EnemyTurnHandler>
         TurnManger.Instance.SetTurn(TurnManger.TurnTakers.PLAYER);
     }
 
-    private IEnumerator MoveEachAIUnit()
+    async UniTask MoveEachAIUnit(CancellationToken token)
     {
         List<Unit> allAIUnits = FindObjectsOfType<Unit>().Where(u => !u.data.controlledByPlayer).ToList();
 
-        foreach (Unit unit in allAIUnits)
+        try
         {
-            List<GridTile> pathToClosestPlayernit = UnitMovementBehaivor.GetPathToNearestPlayerControlledUnit(unit);
+            foreach (Unit unit in allAIUnits)
+            {
+                List<GridTile> pathToClosestPlayernit = UnitMovementBehaivor.GetPathToNearestPlayerControlledUnit(unit);
 
-            yield return StartCoroutine(UnitMovementHandler.Instance.MovePath(unit, pathToClosestPlayernit));
-
+                await UnitMovementHandler.Instance.MovePath(unit, pathToClosestPlayernit, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("Tasks cancelled");
         }
 
         EndTurn();
-        yield return null;
     }
 }

@@ -1,20 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 using UnityEngine;
+using System;
 
 public class UnitMovementHandler : Singleton<UnitMovementHandler>
 {
-    public IEnumerator MovePath(Unit unitToMove, List<GridTile> path)
+    public async UniTask MovePath(Unit unitToMove, List<GridTile> path, CancellationToken token)
     {
-        for (int i = 0; i < path.Count; i++)
+        try
         {
-            yield return StartCoroutine(MoveStep(unitToMove, path[i]));
+            for (int i = 0; i < path.Count; i++)
+            {
+                await MoveStep(unitToMove, path[i], token);
+            }
         }
-
-        yield return null;
+        catch (OperationCanceledException)
+        {
+            Debug.Log("Tasks cancelled");
+        }
     }
 
-    public IEnumerator MoveStep(Unit unitToMove, GridTile toTile)
+    public async UniTask MoveStep(Unit unitToMove, GridTile toTile, CancellationToken token)
     {
         Vector3 startPos = unitToMove.transform.position;
         Vector3 endPos = GridInformant.Instance.GetPositionWorldFromTile(toTile);
@@ -24,10 +32,18 @@ public class UnitMovementHandler : Singleton<UnitMovementHandler>
 
         while (timePassed < timeToMove)
         {
-            unitToMove.transform.position = Vector3.Lerp(startPos, endPos, (timePassed / timeToMove));
+            try
+            {
+                unitToMove.transform.position = Vector3.Lerp(startPos, endPos, (timePassed / timeToMove));
 
-            timePassed += Time.deltaTime;
-            yield return null;
+                timePassed += Time.deltaTime;
+                await UniTask.WaitForEndOfFrame(this);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Task cancelled");
+            }
+
         }
 
         unitToMove.transform.position = endPos;
@@ -35,7 +51,5 @@ public class UnitMovementHandler : Singleton<UnitMovementHandler>
         {
             Debug.LogError("Unable to move unit along predicted path!");
         }
-
-        yield return null;
     }
 }

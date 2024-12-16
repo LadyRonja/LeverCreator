@@ -1,6 +1,8 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,6 +10,13 @@ public class PlayerTurnHandler : Singleton<PlayerTurnHandler>
 {
     bool inputEnabled = true;
     Unit selectedUnit = null;
+
+    CancellationTokenSource cts = new CancellationTokenSource();
+
+    private void OnDestroy()
+    {
+        cts.Cancel();
+    }
 
     void Update()
     {
@@ -72,7 +81,7 @@ public class PlayerTurnHandler : Singleton<PlayerTurnHandler>
         _ = GridInformant.Instance.TryGetUnit(fromTile, out selectedUnit);
     }
 
-    private void TryToMoveSelectedUnit(GridTile toTile)
+    private async void TryToMoveSelectedUnit(GridTile toTile)
     {
         inputEnabled = false;
         if(!GridInformant.Instance.TryGetTileFromUnit(selectedUnit.data, out GridTile fromTile)) { inputEnabled = true; return; }
@@ -80,17 +89,22 @@ public class PlayerTurnHandler : Singleton<PlayerTurnHandler>
         List<GridTile> path = Pathfinder.FindPath(fromTile, toTile);
         if(path == null) { inputEnabled = true; selectedUnit = null; return; }
         if(path.Count == 0) { inputEnabled = true; selectedUnit = null; return; }
-
-        //Debug.Log("starting movement!");
-        StartCoroutine(StartMovement(selectedUnit, path));
+        
+        await StartMovement(selectedUnit, path, cts.Token);
     }
 
-    public IEnumerator StartMovement(Unit unitToMove, List<GridTile> path)
+    public async UniTask StartMovement(Unit unitToMove, List<GridTile> path, CancellationToken token)
     {
-        yield return StartCoroutine(UnitMovementHandler.Instance.MovePath(selectedUnit, path));
+        try
+        {
+            await UnitMovementHandler.Instance.MovePath(selectedUnit, path, token);
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("Task cancelled");
+        }
 
         selectedUnit = null;
         inputEnabled = true;
-        yield return null;
     }
 }

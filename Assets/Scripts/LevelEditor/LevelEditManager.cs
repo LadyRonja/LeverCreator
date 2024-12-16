@@ -82,7 +82,6 @@ public class LevelEditManager : Singleton<LevelEditManager>
         if (editModes.TryGetValue((editMethod, editLayer), out EditMode currentMode))
         {
             lastPosClicked = ClickToCoords();
-            //Debug.Log($"Pos: {lastPosClicked}, mode: {editMethod}, layer: {editLayer}");
             currentMode();
         }
     }
